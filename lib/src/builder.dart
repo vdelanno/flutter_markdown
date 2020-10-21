@@ -203,23 +203,36 @@ class MarkdownBuilder implements md.NodeVisitor {
       if (start != null) bElement.nextListIndex = start;
       _blocks.add(bElement);
     } else {
+      if (tag == 'a') {
+        String text = extractTextFromElement(element);
+        // Don't add empty links
+        if (text == null) {
+          return false;
+        }
+        String destination = element.attributes['href'];
+        String title = element.attributes['title'] ?? "";
+
+        _linkHandlers.add(
+          delegate.createLink(text, destination, title),
+        );
+      }
+
       _addParentInlineIfNeeded(_blocks.last.tag);
+
+      // The Markdown parser passes empty table data tags for blank
+      // table cells. Insert a text node with an empty string in this
+      // case for the table cell to get properly created.
+      if (element.tag == 'td' &&
+          element.children != null &&
+          element.children.isEmpty) {
+        element.children.add(md.Text(''));
+      }
 
       TextStyle parentStyle = _inlines.last.style;
       _inlines.add(_InlineElement(
         tag,
         style: parentStyle.merge(styleSheet.styles[tag]),
       ));
-    }
-
-    if (tag == 'a') {
-      String text = extractTextFromElement(element);
-      String destination = element.attributes['href'];
-      String title = element.attributes['title'] ?? "";
-
-      _linkHandlers.add(
-        delegate.createLink(text, destination, title),
-      );
     }
 
     return true;
