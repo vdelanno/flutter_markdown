@@ -350,10 +350,10 @@ class MarkdownBuilder implements md.NodeVisitor {
     } else {
       final _InlineElement current = _inlines.removeLast();
       final _InlineElement parent = _inlines.last;
-
       if (builders.containsKey(tag)) {
+        TextStyle baseStyle = parent.style.merge(styleSheet.styles[tag]);
         final Widget child =
-            builders[tag].visitElementAfter(element, styleSheet.styles[tag]);
+            builders[tag].visitElementAfter(element, baseStyle);
         if (child != null) current.children[0] = child;
       } else if (tag == 'img') {
         // create an image widget for this image
