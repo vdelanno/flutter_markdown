@@ -555,6 +555,7 @@ class MarkdownBuilder implements md.NodeVisitor {
         mergedTexts.add(_buildRichText(
           mergedSpan,
           textAlign: textAlign,
+          key: child.key == null ? previous.key : child.key,
         ));
       } else if (mergedTexts.isNotEmpty &&
           mergedTexts.last is SelectableText &&
@@ -570,6 +571,7 @@ class MarkdownBuilder implements md.NodeVisitor {
           _buildRichText(
             mergedSpan,
             textAlign: textAlign,
+            key: child.key == null ? previous.key : child.key,
           ),
         );
       } else {
@@ -648,19 +650,18 @@ class MarkdownBuilder implements md.NodeVisitor {
         : TextSpan(children: mergedSpans);
   }
 
-  Widget _buildRichText(TextSpan text, {TextAlign textAlign}) {
+  Widget _buildRichText(TextSpan text, {TextAlign textAlign, Key key}) {
     if (selectable) {
-      return SelectableText.rich(
-        text,
-        textScaleFactor: styleSheet.textScaleFactor,
-        textAlign: textAlign ?? TextAlign.start,
-      );
+      return SelectableText.rich(text,
+          textScaleFactor: styleSheet.textScaleFactor,
+          textAlign: textAlign ?? TextAlign.start,
+          key: key);
     } else {
       return RichText(
-        text: text,
-        textScaleFactor: styleSheet.textScaleFactor,
-        textAlign: textAlign ?? TextAlign.start,
-      );
+          text: text,
+          textScaleFactor: styleSheet.textScaleFactor,
+          textAlign: textAlign ?? TextAlign.start,
+          key: key);
     }
   }
 }
