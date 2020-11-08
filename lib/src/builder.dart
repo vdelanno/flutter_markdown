@@ -229,10 +229,11 @@ class MarkdownBuilder implements md.NodeVisitor {
       }
 
       TextStyle parentStyle = _inlines.last.style;
-      _inlines.add(_InlineElement(
-        tag,
-        style: parentStyle.merge(styleSheet.styles[tag]),
-      ));
+      TextStyle childStyle = parentStyle;
+      if (styleSheet.styles.containsKey(tag)) {
+        childStyle = parentStyle.merge(styleSheet.styles[tag]);
+      }
+      _inlines.add(_InlineElement(tag, style: childStyle));
     }
 
     return true;
@@ -364,10 +365,19 @@ class MarkdownBuilder implements md.NodeVisitor {
       final _InlineElement current = _inlines.removeLast();
       final _InlineElement parent = _inlines.last;
       if (builders.containsKey(tag)) {
-        TextStyle baseStyle = parent.style.merge(styleSheet.styles[tag]);
+        TextStyle baseStyle = parent.style;
+        if (styleSheet.styles.containsKey(tag)) {
+          baseStyle = baseStyle.merge(styleSheet.styles[tag]);
+        }
         final Widget child =
             builders[tag].visitElementAfter(element, baseStyle);
-        if (child != null) current.children[0] = child;
+        if (child != null) {
+          if (current.children.length > 0) {
+            current.children[0] = child;
+          } else {
+            current.children.add(child);
+          }
+        }
       } else if (tag == 'img') {
         // create an image widget for this image
         current.children.add(_buildImage(
